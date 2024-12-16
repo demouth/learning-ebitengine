@@ -1,0 +1,48 @@
+package main
+
+import (
+	"bytes"
+	_ "embed"
+	"image"
+	_ "image/png"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
+var (
+	// カボチャの画像を埋め込む
+	//go:embed pumpkin.png
+	pumpkinPng   []byte
+	pumpkinImage *ebiten.Image
+	x            int
+	y            int
+)
+
+type Game struct{}
+
+// Updateはゲームを1ティック更新します
+func (g *Game) Update() error {
+	x += 2
+	y += 3
+	x = x % 640 // xの値が640を超えたら0に戻す
+	y = y % 480 // yの値が480を超えたら0に戻す
+	return nil
+}
+
+// Draw はゲーム画面を1フレーム分描画します
+func (g *Game) Draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	screen.DrawImage(pumpkinImage, op)
+}
+
+// Layout はゲームの論理的な画面サイズを返します
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return outsideWidth, outsideHeight
+}
+func main() {
+	// png画像を *ebiten.Image に変換します
+	img, _, _ := image.Decode(bytes.NewReader(pumpkinPng))
+	pumpkinImage = ebiten.NewImageFromImage(img)
+	ebiten.RunGame(&Game{})
+}
